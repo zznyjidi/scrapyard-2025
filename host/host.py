@@ -3,19 +3,20 @@ import serial
 import pyautogui
 import re
 
-DEBUG = False
+DEBUG = True
 
 # Connection Settings
 serialPath = '/dev/ttyACM0'
 
 # Mapping Settings
-areaSize = (1920, 1080)
+areaSize = (1852, 1235)
 areaOffset = (0, 0)
 
 # Client Settings
 serialScreenSize = (800, 480)
 serialMoveCommand = '(?:x0=)([0-9]+)(?: y0=)([0-9]+)'
-serialClickCommand = 'CLICK'
+serialMouseDownCommand = 'DOWN'
+serialMouseUpCommand = 'UP'
 
 
 
@@ -35,20 +36,33 @@ def debugPrint(*values):
         print(*values)
 
 ignoreClick = True
-with serial.Serial(serialPath) as tty:
+mouse = False
+location = ()
+pyautogui.PAUSE = 0
+with serial.Serial(serialPath, 115200) as tty:
     while True:
         line = tty.readline().decode().strip()
         if (location := re.findall(serialMoveCommand, line)):
             location = (int(location[0][0]), int(location[0][1]))
-            debugPrint(f'MOVE: {location}')
             location = locationMapping(location, serialScreenSize, areaSize, areaOffset)
-            pyautogui.moveTo(location[0], location[1], 0)
-        elif (line == serialClickCommand):
+            debugPrint(f'MOVE: {location}')
+            pyautogui.moveTo(*location)
+        elif (line == serialMouseDownCommand):
             if (not ignoreClick):
-                debugPrint('CLICK')
-                pyautogui.click()
+                debugPrint('MOUSE DOWN')
+                if not mouse:
+                    pyautogui.mouseDown()
+                    mouse = True
             else:
-                debugPrint('CLICK: IGNORED')
+                debugPrint('MOUSE DOWN: IGNORED')
+        elif (line == serialMouseUpCommand):
+            if (not ignoreClick):
+                debugPrint('MOUSE UP')
+                if mouse:
+                    pyautogui.mouseUp()
+                    mouse = False
+            else:
+                debugPrint('MOUSE UP: IGNORED')
         elif (line == 'SWITCH'):
             debugPrint(f'TOUCH: {ignoreClick}')
             ignoreClick = not ignoreClick
