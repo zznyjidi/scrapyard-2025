@@ -1,22 +1,22 @@
-reverseMode = False
-next_toggle_time = time.time() + random.uniform(5, 10)
+from typing import Tuple
 
+from debug import debugPrint
+import config
 
-current_time = time.time()
-        if current_time >= next_toggle_time:
-            reverseMode = not reverseMode
-            mode_str = "ENABLED" if reverseMode else "DISABLED"
-            debugPrint(f"[TROLL MODE] Reverse mode toggled {mode_str}")
-            next_toggle_time = current_time + random.uniform(5, 10)
+def reversePos(mapped_pos: Tuple[int, int]) -> Tuple[int, int]:
+    """Reverse Area Mapping
 
+    Args:
+        mapped_pos (Tuple[int, int]): Input Position after mapping
 
-if reverseMode:
-                center_x = areaOffset[0] + areaSize[0] / 2
-                center_y = areaOffset[1] + areaSize[1] / 2
-                mapped_coords = (
-                    int(2 * center_x - mapped_coords[0]),
-                    int(2 * center_y - mapped_coords[1])
-                )
-                debugPrint("MOVE (reversed):", mapped_coords)
-            else:
-                debugPrint("MOVE (mapped):", mapped_coords)
+    Returns:
+        Tuple[int, int]: Reversed Position
+    """
+    center_x = config.areaOffset[0] + config.areaSize[0] / 2
+    center_y = config.areaOffset[1] + config.areaSize[1] / 2
+    reversed_pos = (
+        int(2 * center_x - mapped_pos[0]),
+        int(2 * center_y - mapped_pos[1])
+    )
+    debugPrint("Pos Reversed: ", reversed_pos)
+    return reversed_pos
