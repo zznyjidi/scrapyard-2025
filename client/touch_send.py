@@ -1,27 +1,29 @@
-#from machine import TOUCH
-from machine import I2C
-import touchscreen as tp
-import time
-from maix import GPIO
-from fpioa_manager import fm
+from machine import Pin, FPIOA, TOUCH
 
-# Instantiate the TOUCH device (device 0)
-i2c = I2C(I2C.I2C0, freq=400000, scl=30, sda=31)
-tp.init(i2c)
+# Init Touch
+touch = TOUCH(0)
 
 # Init Button
-fm.register(16, fm.fpioa.GPIO1)
+fpioa = FPIOA()
+fpioa.set_function(21, FPIOA.GPIO21)
+KEY = Pin(21, Pin.IN, Pin.PULL_UP)
 
-KEY = GPIO(GPIO.GPIO1, GPIO.IN)
-
-lastPos = ()
+firstTouch = False
+buttonTriggered = False
 
 while True:
-    touchEvent = tp.read()
-    if touchEvent != lastPos:
-        lastPos = touchEvent
-        print(f'x0={touchEvent[1]} y0={touchEvent[2]}')
-        if (lastPos[0] == tp.STATUS_PRESS):
+    touchEvents = touch.read()
+    if touchEvents:
+        pos = (touchEvents[0].x, touchEvents[0].y)
+        print(f'x0={pos[0]} y0={pos[1]}')
+        if (not firstTouch):
             print('CLICK')
-        if (KEY.value() == 0):
+            firstTouch = True
+    else:
+        firstTouch = False
+    if (KEY.value() == 0):
+        if (not buttonTriggered):
             print('SWITCH')
+            buttonTriggered = True
+    else:
+        buttonTriggered = False
