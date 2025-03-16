@@ -2,6 +2,7 @@
 from machine import Pin, FPIOA, TOUCH # type: ignore
 import time
 import _thread
+import thread_lock
 
 # Init Touch
 touch = TOUCH(0)
@@ -11,30 +12,7 @@ fpioa = FPIOA()
 fpioa.set_function(21, FPIOA.GPIO21)
 KEY = Pin(21, Pin.IN, Pin.PULL_UP)
 
-threadLockPool = []
-
-def waitForAllLocks():
-    global threadLockPool
-    while any(map(lambda lock: not lock.locked(), threadLockPool)):
-        pass
-    for lock in threadLockPool:
-        lock.acquire()
-        lock.release()
-
-def withLock(func):
-    global threadLockPool
-    lock: _thread.LockType = _thread.allocate_lock()
-    threadLockPool.append(lock)
-    
-    def wrapper(*args, **kwargs):
-        lock.acquire()
-        try:
-            func(*args, **kwargs)
-        finally:
-            lock.release()
-    return wrapper
-
-@withLock
+@thread_lock.with_lock
 def touchThread():
     firstTouch = False
     upSent = False
@@ -68,4 +46,4 @@ def touchThread():
 
 _thread.start_new_thread(touchThread, ())
 
-waitForAllLocks()
+thread_lock.waitForAllLocks()
