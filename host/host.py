@@ -44,10 +44,10 @@ with serial.Serial(config.serialPath, 115200) as tty:
             match (line):
                 # Mouse Down
                 case config.serialMouseDownCommand:
-                    enableClick.runIfSwitchStatus(False, "MOUSE DOWN", mouseController.mouseDown)
+                    enableClick.runIfSwitchStatus(True, "MOUSE DOWN", mouseController.mouseDown)
                 # Mouse Up
                 case config.serialMouseUpCommand:
-                    enableClick.runIfSwitchStatus(False, "MOUSE UP", mouseController.mouseUp)
+                    enableClick.runIfSwitchStatus(True, "MOUSE UP", mouseController.mouseUp)
                 # Toggle Touch
                 case config.serialButtonCommand:
                     enableClick.toggle()
