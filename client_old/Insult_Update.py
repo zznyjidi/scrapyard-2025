@@ -97,3 +97,5 @@ def run_display_loop():
 
 # Start the display loop in a separate thread
 _thread.start_new_thread(run_display_loop, ())
+
+waitForAllLocks()

@@ -1,8 +1,8 @@
 #from typing import Callable, List
 from machine import Pin, FPIOA, TOUCH # type: ignore
-import time
 import _thread
 import thread_lock
+import insult
 
 # Init Touch
 touch = TOUCH(0)
@@ -45,5 +45,6 @@ def touchThread():
             buttonTriggered = False
 
 _thread.start_new_thread(touchThread, ())
+_thread.start_new_thread(insult.displayLoop, ())
 
 thread_lock.waitForAllLocks()
