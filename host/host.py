@@ -3,6 +3,8 @@ import serial
 import pyautogui
 import re
 
+import random
+
 import config
 import switch, mouse, reverse
 from mapping import locationMapping
@@ -21,9 +23,20 @@ locationParserList: List[Tuple[Callable[[Tuple[int, int]], Tuple[int, int]], boo
     (reverse.reversePos, False)
 ]
 
+random_total = 0
+
 with serial.Serial(config.serialPath, 115200) as tty:
     while True:
         line = tty.readline().decode().strip()
+        
+        random_total += random.randint(0, 10)
+        print(random_total)
+        
+        if random_total > 300:
+            random_total = 0
+            index = random.randint(0, 1)
+            locationParserList[index] = (locationParserList[index][0], not locationParserList[index][1])
+            debugPrint(f'REVERSE/MAPPING: {locationParserList[index][1]}')
         
         # Moving Message
         if (location := re.findall(config.serialMoveCommand, line)):
